@@ -1,8 +1,8 @@
-Showcases the issue where you are unable to edit the transcript while the microphone is listening as this will continue with the old text when it transcribes again.
+Showcases the feature where you are able to edit the transcript while the microphone is listening.
 
-# Instructions to Recreate Issue
+# Instructions
 
 1. Start listening on microphone
 2. Speak something and observe the transcript appearing
 3. While the microphone is on and listening, edit the transcript
-4. Start speaking and notice the transcript continue from the previos state
+4. Start speaking and notice the transcript continues but maintains the edited context
