@@ -1,0 +1,97 @@
+diff --git a/node_modules/react-speech-recognition/lib/SpeechRecognition.js b/node_modules/react-speech-recognition/lib/SpeechRecognition.js
+index 016da0d..0a05173 100644
+--- a/node_modules/react-speech-recognition/lib/SpeechRecognition.js
++++ b/node_modules/react-speech-recognition/lib/SpeechRecognition.js
+@@ -103,10 +103,18 @@ var useSpeechRecognition = function useSpeechRecognition() {
+     dispatch((0, _actions.clearTranscript)());
+   };
+ 
++  var dispatchMutateTranscript = function dispatchMutateTranscript(mutatedTranscript) {
++    dispatch((0, _actions.mutateTranscript)(mutatedTranscript));
++  };
++
+   var resetTranscript = (0, _react.useCallback)(function () {
+     recognitionManager.resetTranscript();
+     dispatchClearTranscript();
+   }, [recognitionManager]);
++  var editTranscript = (0, _react.useCallback)(function (mutatedTranscript) {
++    recognitionManager.resetTranscript();
++    dispatchMutateTranscript(mutatedTranscript);
++  }, [recognitionManager]);
+ 
+   var testFuzzyMatch = function testFuzzyMatch(command, input, fuzzyMatchingThreshold) {
+     var commandToString = _typeof(command) === 'object' ? command.toString() : command;
+@@ -234,7 +242,8 @@ var useSpeechRecognition = function useSpeechRecognition() {
+     isMicrophoneAvailable: isMicrophoneAvailable,
+     resetTranscript: resetTranscript,
+     browserSupportsSpeechRecognition: browserSupportsSpeechRecognition,
+-    browserSupportsContinuousListening: browserSupportsContinuousListening
++    browserSupportsContinuousListening: browserSupportsContinuousListening,
++    editTranscript: editTranscript
+   };
+ };
+ 
+diff --git a/node_modules/react-speech-recognition/lib/actions.js b/node_modules/react-speech-recognition/lib/actions.js
+index 03016a8..3e3a5eb 100644
+--- a/node_modules/react-speech-recognition/lib/actions.js
++++ b/node_modules/react-speech-recognition/lib/actions.js
+@@ -3,7 +3,7 @@
+ Object.defineProperty(exports, "__esModule", {
+   value: true
+ });
+-exports.appendTranscript = exports.clearTranscript = void 0;
++exports.mutateTranscript = exports.appendTranscript = exports.clearTranscript = void 0;
+ 
+ var _constants = require("./constants");
+ 
+@@ -26,3 +26,15 @@ var appendTranscript = function appendTranscript(interimTranscript, finalTranscr
+ };
+ 
+ exports.appendTranscript = appendTranscript;
++
++var mutateTranscript = function mutateTranscript(mutatedTranscript) {
++  return {
++    type: _constants.MUTATE_TRANSCRIPT,
++    payload: {
++      mutatedTranscript: mutatedTranscript
++    }
++  };
++};
++
++exports.mutateTranscript = mutateTranscript;
++// EOF
+\ No newline at end of file
+diff --git a/node_modules/react-speech-recognition/lib/constants.js b/node_modules/react-speech-recognition/lib/constants.js
+index 947ebe0..64a2a86 100644
+--- a/node_modules/react-speech-recognition/lib/constants.js
++++ b/node_modules/react-speech-recognition/lib/constants.js
+@@ -3,8 +3,10 @@
+ Object.defineProperty(exports, "__esModule", {
+   value: true
+ });
+-exports.APPEND_TRANSCRIPT = exports.CLEAR_TRANSCRIPT = void 0;
++exports.MUTATE_TRANSCRIPT = exports.APPEND_TRANSCRIPT = exports.CLEAR_TRANSCRIPT = void 0;
+ var CLEAR_TRANSCRIPT = 'CLEAR_TRANSCRIPT';
+ exports.CLEAR_TRANSCRIPT = CLEAR_TRANSCRIPT;
+ var APPEND_TRANSCRIPT = 'APPEND_TRANSCRIPT';
+ exports.APPEND_TRANSCRIPT = APPEND_TRANSCRIPT;
++var MUTATE_TRANSCRIPT = 'MUTATE_TRANSCRIPT';
++exports.MUTATE_TRANSCRIPT = MUTATE_TRANSCRIPT;
+\ No newline at end of file
+diff --git a/node_modules/react-speech-recognition/lib/reducers.js b/node_modules/react-speech-recognition/lib/reducers.js
+index 3f62ea8..7987ce6 100644
+--- a/node_modules/react-speech-recognition/lib/reducers.js
++++ b/node_modules/react-speech-recognition/lib/reducers.js
+@@ -23,6 +23,12 @@ var transcriptReducer = function transcriptReducer(state, action) {
+         finalTranscript: (0, _utils.concatTranscripts)(state.finalTranscript, action.payload.finalTranscript)
+       };
+ 
++    case _constants.MUTATE_TRANSCRIPT:
++      return {
++        interimTranscript: '',
++        finalTranscript: action.payload.mutatedTranscript
++      };
++
+     default:
+       throw new Error();
+   }
